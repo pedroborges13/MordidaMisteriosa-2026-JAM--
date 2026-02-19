@@ -40,7 +40,6 @@ public class UIManager : MonoBehaviour
     void UpdateActionPointUI(int actionPoint)
     {
         actionPointText.text = "Action Points: " + actionPoint.ToString();
-        Debug.Log("Water button");
     }
 
     void UpdateStressBar(float currentStress)

@@ -118,7 +118,7 @@ public class RoundManager : MonoBehaviour
                     {
                         stressToAdd = 10;
                     }
-                    else if (dog.Temperament == Temperament.Restless && dog.Temperament == Temperament.Agressive)
+                    else if (dog.Temperament == Temperament.Restless || dog.Temperament == Temperament.Agressive)
                     {
                         stressToAdd = 20;
                     }
