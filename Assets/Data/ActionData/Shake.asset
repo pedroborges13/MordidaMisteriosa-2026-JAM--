@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9a421185a2ca624f8161ecfefd57cb4, type: 3}
-  m_Name: Water
+  m_Name: Shake
   m_EditorClassIdentifier: Assembly-CSharp::ActionData
-  actionName: Water
-  actionType: 0
+  actionName: Shake
+  actionType: 2
   cost: 1

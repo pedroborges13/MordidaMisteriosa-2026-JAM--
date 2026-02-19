@@ -7,10 +7,10 @@ public enum BoxReaction { None, SmallShake, BigShake, Attack}
 public class ActionData : ScriptableObject
 {
     [SerializeField] private string actionName;
+    [SerializeField] private ActionType actionType;
     [SerializeField] private int cost;
-    [SerializeField] private int streessImpact;
 
     public string ActionName => actionName;
+    public ActionType Type => actionType;
     public int Cost => cost;
-    public int StreessImpact => streessImpact;  
 }
