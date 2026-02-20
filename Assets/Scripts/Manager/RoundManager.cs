@@ -5,6 +5,7 @@ using Unity.Burst.CompilerServices;
 using UnityEditor.Experimental.GraphView;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
 
 public class RoundManager : MonoBehaviour
@@ -14,6 +15,7 @@ public class RoundManager : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private int actionPoints;
     [SerializeField] private int maxStress;
+    [SerializeField] private float snakeProbability;
 
     public int ActionPoints => actionPoints;
     public int MaxStress => maxStress;
@@ -25,13 +27,15 @@ public class RoundManager : MonoBehaviour
     [Header("Database")]
     [SerializeField] private List<AnimalData> animalList;
 
-    public AnimalData CurrentAnimal => currentAnimal; //read only
+    public AnimalData CurrentAnimal => currentAnimal; //Read only
 
     //Events
     public event Action OnGameOver;
     public event Action<int> OnActionPointChanged;
     public event Action<float> OnStressChanged;
     public event Action<string> OnFeedbackReceived;
+    public event Action<int> OnActionCost;
+    public event Action<int> OnStressAdded;
     //public event Action OnBoxReaction
 
     void Awake()
@@ -48,13 +52,32 @@ public class RoundManager : MonoBehaviour
 
     void RandomAnimal()
     {
-        if (animalList != null && animalList.Count > 0)
-        {
-            int randomIndex = Random.Range(0, animalList.Count);
-            currentAnimal = animalList[randomIndex];
+        if (animalList == null || animalList.Count == 0) return;
 
-            AnimalDebug();
+        float roll = Random.Range(0f, 100f);
+        
+        List<AnimalData> possibleAnimals = new List<AnimalData>();
+
+        if (roll <= snakeProbability)
+        {
+            foreach (var animal in animalList)
+            {
+                if (animal is SnakeData) possibleAnimals.Add(animal);
+            }
         }
+        else
+        {
+            foreach (var animal in animalList)
+            {
+                if (animal is DogData) possibleAnimals.Add(animal);
+            }
+        }
+
+        int randomIndex = Random.Range(0,possibleAnimals.Count);
+        currentAnimal = possibleAnimals[randomIndex];
+
+        AnimalDebug();
+
     }
 
     void AnimalDebug()
@@ -78,6 +101,7 @@ public class RoundManager : MonoBehaviour
         }
 
         actionPoints -= action.Cost;
+        OnActionCost?.Invoke(action.Cost);
         OnActionPointChanged?.Invoke(actionPoints);
 
         Reaction(action.Type);
@@ -220,6 +244,7 @@ public class RoundManager : MonoBehaviour
         currentStress += stressToAdd;
         OnStressChanged?.Invoke(currentStress);
         OnFeedbackReceived?.Invoke(feedback);
+        OnStressAdded?.Invoke(stressToAdd);
         //OnBoxReact?.Invoke(reaction);
 
         Debug.Log($"Stress Atual: {currentStress}/{maxStress} | Feedback: {feedback}");

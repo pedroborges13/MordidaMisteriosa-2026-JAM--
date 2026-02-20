@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System.Globalization;
 
 public class GuessManager : MonoBehaviour
 {
@@ -15,7 +16,8 @@ public class GuessManager : MonoBehaviour
     [Header("Feedback")]
     [SerializeField] private TextMeshProUGUI resultText;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public string FinalMessage {  get; private set; }
+
     void Start()
     {
         clipboardPanel.SetActive(false);
@@ -26,7 +28,6 @@ public class GuessManager : MonoBehaviour
         OnSpeciesChanged(speciesDropdown.value);
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
@@ -50,9 +51,9 @@ public class GuessManager : MonoBehaviour
     void OnSpeciesChanged(int index)
     {
         //Dog
-        if (index == 0) dogOptionsPanel.SetActive(true);
+        if (index == 0) dogOptionsPanel.SetActive(true); //Refers to the UI dropdown index value
         //Snake
-        else if (index == 1) dogOptionsPanel.SetActive(false);
+        else if (index == 1) dogOptionsPanel.SetActive(false); //Refers to the UI dropdown index value
     }
 
     public void ConfirmGuess()
@@ -120,13 +121,20 @@ public class GuessManager : MonoBehaviour
 
     void WinGame(string message)
     {
-        resultText.text = $"<color=green> Vitória!</color>\n{message}";
-        resultText.gameObject.SetActive(true);
+        FinalMessage = message;
+        CloseClipboard();
+        //resultText.text = $"<color=green> Vitória!</color>\n{message}";
+        //resultText.gameObject.SetActive(true);
+        GameManager.Instance.SetVictory();
     }
 
     void LoseGame(string message)
     {
-        resultText.text = $"<color=red> Derrota!</color>\n{message}";
-        resultText.gameObject.SetActive(true);
+        FinalMessage = message;
+        CloseClipboard();
+        //resultText.text = $"<color=red> Derrota!</color>\n{message}";
+        //resultText.gameObject.SetActive(true);
+        GameManager.Instance.SetGameOver();
     }
+
 }
