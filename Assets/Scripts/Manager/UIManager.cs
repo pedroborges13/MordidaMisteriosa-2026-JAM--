@@ -30,6 +30,7 @@ public class UIManager : MonoBehaviour
 
     [Header("Floating numbers")]
     [SerializeField] private GameObject floatingTextPrefab;
+    [SerializeField] private Transform mainCanvasTransform;
     [SerializeField] private Transform stressBarTransform;
     [SerializeField] private Transform actionPointsTransform;
 
@@ -105,17 +106,15 @@ public class UIManager : MonoBehaviour
             SpawnFloatingText("+" + amount.ToString(), Color.orange, stressBarTransform);
         }
     }
-
     void SpawnFloatingText(string message, Color color, Transform targetTransform)
     {
-        if (floatingTextPrefab == null) return;
+        if (floatingTextPrefab == null || mainCanvasTransform == null) return;
 
-        GameObject textInstance = Instantiate(floatingTextPrefab, targetTransform.position, Quaternion.identity);
+        GameObject textInstance = Instantiate(floatingTextPrefab, mainCanvasTransform);
 
-        textInstance.transform.position = new Vector3(targetTransform.position.x, targetTransform.position.y, targetTransform.position.z - 1f); 
-        textInstance.GetComponentInChildren<FloatingText>().Setup(message, color);
+        textInstance.transform.position = new Vector3(targetTransform.position.x, targetTransform.position.y - 100f, targetTransform.position.z - 1f); 
 
-        Debug.Log($"Spawnou: {textInstance.name} na posição {textInstance.transform.position}");
+        textInstance.GetComponent<FloatingText>().Setup(message, color);
     }
 
     void HandleStateChange(GameState newState)
@@ -140,7 +139,7 @@ public class UIManager : MonoBehaviour
 
     void UpdateActionPointUI(int actionPoint)
     {
-        actionPointText.text = "Action Points: " + actionPoint.ToString();
+        actionPointText.text = "Pontos de Ação: " + actionPoint.ToString();
     }
 
     void UpdateStressBar(float currentStress)
