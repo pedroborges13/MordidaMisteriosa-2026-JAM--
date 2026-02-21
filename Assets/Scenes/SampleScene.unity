@@ -422,7 +422,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoundManager
   actionPoints: 3
   maxStress: 100
-  snakeProbability: 30
+  snakeProbability: 25
   currentStress: 0
   currentAnimal: {fileID: 0}
   animalList:
@@ -3752,7 +3752,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 1
+  m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -4692,6 +4692,7 @@ MonoBehaviour:
   feedbackText: {fileID: 1237105510}
   feedbackDuration: 3
   typingSpeed: 0.04
+  barAnimationSpeed: 2
   floatingTextPrefab: {fileID: 3794243336462674405, guid: 165d85d28e7114541a91470c1a3c9a80, type: 3}
   stressBarTransform: {fileID: 897104257}
   actionPointsTransform: {fileID: 928764880}

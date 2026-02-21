@@ -24,6 +24,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI feedbackText;
     [SerializeField] private float feedbackDuration;
     [SerializeField] private float typingSpeed;
+    [SerializeField] private float barAnimationSpeed;
+    private Coroutine feedbackCoroutine;
+    private Coroutine stressBarCoroutine;
 
     [Header("Floating numbers")]
     [SerializeField] private GameObject floatingTextPrefab;
@@ -63,12 +66,12 @@ public class UIManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(message)) return;
 
-        StopAllCoroutines();
+        if (feedbackCoroutine != null) StopCoroutine(feedbackCoroutine);
 
-        StartCoroutine(FeedbackRoutine(message));   
+        feedbackCoroutine = StartCoroutine(FeedbackLettersAnimation(message));   
     }
 
-    IEnumerator FeedbackRoutine(string message)
+    IEnumerator FeedbackLettersAnimation(string message)
     {
         actionButtonsGroup.SetActive(false);
         feedbackText.text = "";    
@@ -107,12 +110,12 @@ public class UIManager : MonoBehaviour
     {
         if (floatingTextPrefab == null) return;
 
-        /*GameObject textInstance = Instantiate(floatingTextPrefab, targetTransform.position, Quaternion.identity);
+        GameObject textInstance = Instantiate(floatingTextPrefab, targetTransform.position, Quaternion.identity);
 
         textInstance.transform.position = new Vector3(targetTransform.position.x, targetTransform.position.y, targetTransform.position.z - 1f); 
         textInstance.GetComponentInChildren<FloatingText>().Setup(message, color);
 
-        Debug.Log($"Spawnou: {textInstance.name} na posição {textInstance.transform.position}");*/
+        Debug.Log($"Spawnou: {textInstance.name} na posição {textInstance.transform.position}");
     }
 
     void HandleStateChange(GameState newState)
@@ -142,7 +145,26 @@ public class UIManager : MonoBehaviour
 
     void UpdateStressBar(float currentStress)
     {
-        stressBar.value = currentStress;
+        if (stressBarCoroutine != null) StopCoroutine(stressBarCoroutine);
+
+        stressBarCoroutine = StartCoroutine(StressBarAnimation(currentStress));
+    }
+
+    IEnumerator StressBarAnimation(float targetValue)
+    {
+        float startValue = stressBar.value;
+        float time = 0;
+
+        while (time < 1f)
+        {
+            time += Time.deltaTime * barAnimationSpeed;
+
+            stressBar.value = Mathf.Lerp(startValue, targetValue, time);
+
+            yield return null;
+        }
+
+        stressBar.value = targetValue;
     }
 
     public void OnClickButton(ActionData data)
