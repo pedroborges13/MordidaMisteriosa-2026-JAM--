@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
 using UnityEditor.Experimental.GraphView;
@@ -17,6 +18,8 @@ public class RoundManager : MonoBehaviour
     [SerializeField] private int maxStress;
     [SerializeField] private float snakeProbability;
     [SerializeField] private Transform animalTransform;
+    [SerializeField] private GameObject snakeJumpscare;
+
     public int ActionPoints => actionPoints;
     public int MaxStress => maxStress;
     public GameObject SpawnedAnimalObject { get; private set; }
@@ -25,6 +28,9 @@ public class RoundManager : MonoBehaviour
     [SerializeField] private float currentStress;
     [SerializeField] private AnimalData currentAnimal;
     public AnimalData CurrentAnimal => currentAnimal; //Read only
+
+    [Header("Box Animation")]
+    [SerializeField] private Animator boxAnimator;
 
     [Header("Database")]
     [SerializeField] private List<AnimalData> animalList;
@@ -36,11 +42,10 @@ public class RoundManager : MonoBehaviour
     public event Action<string> OnFeedbackReceived;
     public event Action<int> OnActionCost;
     public event Action<int> OnStressAdded;
-    //public event Action OnBoxReaction
 
     void Awake()
     {
-        if(Instance == null) Instance = this;
+        if (Instance == null) Instance = this;
         else Destroy(gameObject);
     }
 
@@ -55,7 +60,7 @@ public class RoundManager : MonoBehaviour
         if (animalList == null || animalList.Count == 0) return;
 
         float roll = Random.Range(0f, 100f);
-        
+
         List<AnimalData> possibleAnimals = new List<AnimalData>();
 
         if (roll <= snakeProbability)
@@ -73,7 +78,7 @@ public class RoundManager : MonoBehaviour
             }
         }
 
-        int randomIndex = Random.Range(0,possibleAnimals.Count);
+        int randomIndex = Random.Range(0, possibleAnimals.Count);
         currentAnimal = possibleAnimals[randomIndex];
 
         SpawnedAnimalObject = Instantiate(currentAnimal.AnimalPrefab, animalTransform);
@@ -147,7 +152,7 @@ public class RoundManager : MonoBehaviour
                     {
                         stressToAdd = 20;
                     }
-                    
+
                 }
                 else if (snake != null)
                 {
@@ -158,11 +163,20 @@ public class RoundManager : MonoBehaviour
                 break;
 
             case ActionType.Hand:
+                StartCoroutine(BoxOpenCloseAnimationRoutine());
+
                 if (snake != null)
                 {
                     reaction = BoxReaction.Attack;
-                    feedback = "Você foi atacado!";
-                    OnGameOver?.Invoke();
+                    feedback = "";
+
+                    snakeJumpscare.SetActive(true);
+                    Animator snakeAnim = snakeJumpscare.GetComponent<Animator>();   
+
+                    if (snakeAnim != null) snakeAnim.SetTrigger("HandAttack");
+
+                    StartCoroutine(DelayedGameOver());
+
                     return;
                 }
                 else if (dog != null)
@@ -246,8 +260,29 @@ public class RoundManager : MonoBehaviour
         OnStressChanged?.Invoke(currentStress);
         OnFeedbackReceived?.Invoke(feedback);
         OnStressAdded?.Invoke(stressToAdd);
-        //OnBoxReact?.Invoke(reaction);
+        if (boxAnimator != null && reaction != BoxReaction.None) boxAnimator.SetTrigger(reaction.ToString());
 
         Debug.Log($"Stress Atual: {currentStress}/{maxStress} | Feedback: {feedback}");
+    }   
+
+    IEnumerator BoxOpenCloseAnimationRoutine()
+    {
+        if (boxAnimator != null)
+        {
+            boxAnimator.SetTrigger("Open");
+
+            yield return new WaitForSeconds(4f);
+
+            boxAnimator.SetTrigger("Close");
+        }
+    }
+
+    IEnumerator DelayedGameOver()
+    {
+        yield return new WaitForSeconds(0.2f);
+        if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(AudioManager.Instance.pianoJumpScare);
+        yield return new WaitForSeconds(0.6f);
+        UIManager.Instance.ShowGameOverScreen();
+        OnGameOver?.Invoke();
     }
 }

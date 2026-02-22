@@ -16,10 +16,7 @@ public class UIManager : MonoBehaviour
     [Header("Screens")]
     [SerializeField] private GameObject HUDobject;
     [SerializeField] private GameObject pauseScreen;
-    //[SerializeField] private GameObject victoryScreen;
-    //[SerializeField] private TextMeshProUGUI victoryMessageText;
     [SerializeField] private GameObject gameoverScreen;
-    [SerializeField] private TextMeshProUGUI gameoverMessageText;
     [SerializeField] private GameObject resultScreen;
     [SerializeField] private TextMeshProUGUI resultTitleText;
     [SerializeField] private TextMeshProUGUI animalNameText;
@@ -225,8 +222,8 @@ public class UIManager : MonoBehaviour
         yield return StartCoroutine(FadeRoutine(0f));
         if (RoundManager.Instance.CurrentAnimal is SnakeData && GameManager.Instance.CurrentState == GameState.GameOver)
         {
-            yield return new WaitForSeconds(0.1f);
-            redImage.SetActive(true);
+            yield return new WaitForSeconds(0.12f);
+            gameoverScreen.SetActive(true);
         }
 
         ShowFinalResultScreen();
@@ -259,6 +256,12 @@ public class UIManager : MonoBehaviour
 
     void EnableHUD() => HUDobject.SetActive(true);
 
+    public void ShowGameOverScreen()
+    {
+        DisableHUD();
+        gameoverScreen.SetActive(true);
+    }
+
     void ShowFinalResultScreen()
     {
         resultScreen.SetActive(true);
@@ -270,6 +273,7 @@ public class UIManager : MonoBehaviour
             resultTitleText.text = "Você acertou!";
             resultTitleText.color = Color.green;
         }
+        else if (currentState == GameState.GameOver && currentAnimal is SnakeData) resultTitleText.text = "";
         else if (currentState == GameState.GameOver)
         {
             resultTitleText.text = "Você errou!";
@@ -289,7 +293,7 @@ public class UIManager : MonoBehaviour
             else if (dog.Temperament == Temperament.Restless) number2Text.text = "Agitado";
             else number2Text.text = "Agressivo";    
         }
-        else if (currentAnimal is SnakeData)
+        else if (currentAnimal is SnakeData && currentState == GameState.Victory)
         {
             characteristcsGroup.SetActive(false);
             snakeText.text = "Escapou por pouco...";
