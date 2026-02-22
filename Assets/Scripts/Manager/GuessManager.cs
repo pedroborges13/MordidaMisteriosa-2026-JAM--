@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Globalization;
+using System;
 
 public class GuessManager : MonoBehaviour
 {
@@ -100,6 +101,8 @@ public class GuessManager : MonoBehaviour
                 LoseGame($"Você errou as características...");
             }
         }
+
+        UIManager.Instance.StartRevelationTransition();
     }
 
     string GetDogResult(Size size, Temperament temp)
@@ -123,8 +126,6 @@ public class GuessManager : MonoBehaviour
     {
         FinalMessage = message;
         CloseClipboard();
-        //resultText.text = $"<color=green> Vitória!</color>\n{message}";
-        //resultText.gameObject.SetActive(true);
         GameManager.Instance.SetVictory();
     }
 
@@ -132,8 +133,6 @@ public class GuessManager : MonoBehaviour
     {
         FinalMessage = message;
         CloseClipboard();
-        //resultText.text = $"<color=red> Derrota!</color>\n{message}";
-        //resultText.gameObject.SetActive(true);
         GameManager.Instance.SetGameOver();
     }
 

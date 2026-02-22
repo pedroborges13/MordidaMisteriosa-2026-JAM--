@@ -3,9 +3,14 @@ guid: ecbc950d5d4d07d4fbe560cf172688b1
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: 14dogtexture
+    second: {fileID: 2800000, guid: 6411cd968c38cd449af7f7508904d5be, type: 3}
   materials:
-    materialImportMode: 2
+    materialImportMode: 1
     materialName: 0
     materialSearch: 1
     materialLocation: 1

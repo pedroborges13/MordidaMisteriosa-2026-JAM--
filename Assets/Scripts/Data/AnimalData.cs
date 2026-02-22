@@ -21,9 +21,11 @@ public abstract class AnimalData : ScriptableObject
     [Header("Identity")]
     [SerializeField] private string animalName;
     [SerializeField] private Species species;
+    [SerializeField] GameObject animalPrefab;
 
     public string AnimalName => animalName;
     public Species Species => species;  
+    public GameObject AnimalPrefab => animalPrefab;
 }
 
 

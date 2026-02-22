@@ -1,5 +1,6 @@
 using System.Collections;
 using TMPro;
+using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Slider stressBar;
 
     [Header("Screens")]
+    [SerializeField] private GameObject HUDobject;
     [SerializeField] private GameObject pauseScreen;
     [SerializeField] private GameObject victoryScreen;
     [SerializeField] private TextMeshProUGUI victoryMessageText;
@@ -33,6 +35,12 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Transform mainCanvasTransform;
     [SerializeField] private Transform stressBarTransform;
     [SerializeField] private Transform actionPointsTransform;
+
+    [Header("Revelation System")]
+    [SerializeField] private CanvasGroup fadeCanvasGroup;
+    [SerializeField] private GameObject mainCamera;
+    [SerializeField] private GameObject revelationCamera;
+    [SerializeField] private float fadeDuration;
 
     void Awake()
     {
@@ -58,9 +66,20 @@ public class UIManager : MonoBehaviour
 
         UpdateActionPointUI(RoundManager.Instance.ActionPoints);
 
+        if (!HUDobject.activeSelf) EnableHUD();
+
         stressBar.minValue = 0;
         stressBar.maxValue = RoundManager.Instance.MaxStress;
         stressBar.value = 0;
+    }
+
+    void HandleStateChange(GameState newState)
+    {
+        pauseScreen.SetActive(false);
+        victoryScreen.SetActive(false);
+        gameoverScreen.SetActive(false);
+
+        if (newState == GameState.Paused) pauseScreen.SetActive(true);
     }
 
     void ShowFeedback(string message)
@@ -117,26 +136,6 @@ public class UIManager : MonoBehaviour
         textInstance.GetComponent<FloatingText>().Setup(message, color);
     }
 
-    void HandleStateChange(GameState newState)
-    {
-        pauseScreen.SetActive(false);
-        victoryScreen.SetActive(false);
-        gameoverScreen.SetActive(false);
-
-        if (newState == GameState.Paused) pauseScreen.SetActive(true);
-        else if (newState == GameState.Victory)
-        {
-            Debug.Log("Victory");
-            victoryScreen.SetActive(true);
-            victoryMessageText.text = FindAnyObjectByType<GuessManager>().FinalMessage;
-        }
-        else if (newState == GameState.GameOver) 
-        {
-            gameoverScreen.SetActive(true);
-            gameoverMessageText.text = FindAnyObjectByType<GuessManager>().FinalMessage;
-        }
-    }
-
     void UpdateActionPointUI(int actionPoint)
     {
         actionPointText.text = "Pontos de Ação: " + actionPoint.ToString();
@@ -169,6 +168,91 @@ public class UIManager : MonoBehaviour
     public void OnClickButton(ActionData data)
     {
         RoundManager.Instance.ExecuteAction(data);
+    }
+
+    public void StartRevelationTransition()
+    {
+        DisableHUD();
+        StartCoroutine(RevelationTransitionRoutine());
+    }
+
+    IEnumerator RevelationTransitionRoutine()
+    {
+        //Fade out: Screen becomes black
+        yield return StartCoroutine(FadeRoutine(1f));
+
+        //Switch cameras
+        mainCamera.SetActive(false);
+        revelationCamera.SetActive(true);
+
+        // --- SNAKE ATTACK LOGIC ---
+        if (GameManager.Instance.CurrentState == GameState.GameOver)
+        {
+            if (RoundManager.Instance.CurrentAnimal is SnakeData)
+            {
+                GameObject animalObject = RoundManager.Instance.SpawnedAnimalObject;
+
+                if (animalObject != null)
+                {
+                    Animator snakeAnim = animalObject.GetComponent<Animator>();
+
+                    if (snakeAnim != null) snakeAnim.SetTrigger("Attack");
+                }
+            }
+            else
+            {
+                //You lost, but it was a dog (characteristics didn't match)
+                yield return new WaitForSeconds(5f);
+            }
+        }
+        // ------------------------
+
+        //Dramatic pause while the screen is black
+        yield return new WaitForSeconds(0.5f);
+
+        yield return StartCoroutine(FadeRoutine(0f));
+
+        yield return new WaitForSeconds(5f);
+
+        ShowFinalResultScreen();
+    }
+
+    IEnumerator FadeRoutine(float targetAlpha)
+    {
+        float startAlpha = fadeCanvasGroup.alpha;
+        float time = 0;
+
+        while (time < fadeDuration)
+        {
+            time += Time.deltaTime;
+
+            fadeCanvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, time/fadeDuration);
+
+            yield return null;  
+        }
+
+        fadeCanvasGroup.alpha = targetAlpha;
+    }
+
+    void DisableHUD() => HUDobject.SetActive(false);
+
+    void EnableHUD() => HUDobject.SetActive(true);
+
+    void ShowFinalResultScreen()
+    {
+        GameState currentState = GameManager.Instance.CurrentState;
+        GuessManager guessManager = FindAnyObjectByType<GuessManager>();
+
+        if (currentState == GameState.Victory)
+        {
+            victoryScreen.SetActive(true);
+            victoryMessageText.text = guessManager.FinalMessage;
+        }
+        else if (currentState == GameState.GameOver)
+        {
+            gameoverScreen.SetActive(true);
+            gameoverMessageText.text = guessManager.FinalMessage;
+        }
     }
 
     private void OnDestroy()

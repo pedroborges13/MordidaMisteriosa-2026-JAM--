@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a74297c5f8a4c5c4384b718b295e8440, type: 3}
+  m_Name: Corgi
+  m_EditorClassIdentifier: Assembly-CSharp::DogData
+  animalName: Corgi
+  species: 1
+  animalPrefab: {fileID: 919132149155446097, guid: ecbc950d5d4d07d4fbe560cf172688b1, type: 3}
+  size: 0
+  temperament: 1

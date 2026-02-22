@@ -12,7 +12,7 @@ public class FloatingText : MonoBehaviour
         textMesh = GetComponent<TextMeshProUGUI>();
         textMesh.text = text;
         textMesh.color = color;
-        //Destroy(gameObject, lifeTime);
+        Destroy(gameObject, lifeTime);
     }
 
     void Update()

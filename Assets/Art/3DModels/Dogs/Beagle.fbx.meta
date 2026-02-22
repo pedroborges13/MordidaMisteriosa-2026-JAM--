@@ -3,9 +3,19 @@ guid: cf1ff5b4ef36a164b945eaa5d179d379
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.134
+    second: {fileID: 2100000, guid: d8fb08be44dc2ab4a80f781f655bfca0, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: 20dogtexture
+    second: {fileID: 2800000, guid: 09199b616ec253f408910f1c9df762d4, type: 3}
   materials:
-    materialImportMode: 2
+    materialImportMode: 1
     materialName: 0
     materialSearch: 1
     materialLocation: 1

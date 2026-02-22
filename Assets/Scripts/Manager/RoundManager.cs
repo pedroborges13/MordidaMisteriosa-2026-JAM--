@@ -16,18 +16,18 @@ public class RoundManager : MonoBehaviour
     [SerializeField] private int actionPoints;
     [SerializeField] private int maxStress;
     [SerializeField] private float snakeProbability;
-
+    [SerializeField] private Transform animalTransform;
     public int ActionPoints => actionPoints;
     public int MaxStress => maxStress;
+    public GameObject SpawnedAnimalObject { get; private set; }
 
     [Header("Current Status")]
     [SerializeField] private float currentStress;
     [SerializeField] private AnimalData currentAnimal;
+    public AnimalData CurrentAnimal => currentAnimal; //Read only
 
     [Header("Database")]
     [SerializeField] private List<AnimalData> animalList;
-
-    public AnimalData CurrentAnimal => currentAnimal; //Read only
 
     //Events
     public event Action OnGameOver;
@@ -76,6 +76,7 @@ public class RoundManager : MonoBehaviour
         int randomIndex = Random.Range(0,possibleAnimals.Count);
         currentAnimal = possibleAnimals[randomIndex];
 
+        SpawnedAnimalObject = Instantiate(currentAnimal.AnimalPrefab, animalTransform);
         AnimalDebug();
 
     }
