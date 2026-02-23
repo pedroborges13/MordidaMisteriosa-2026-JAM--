@@ -277,7 +277,15 @@ public class UIManager : MonoBehaviour
     public void ShowGameOverScreen()
     {
         DisableHUD();
-        if (RoundManager.Instance.CurrentStress >= 100) stressScreen.SetActive(true);
+        /*if (RoundManager.Instance.CurrentStress >= 100 && RoundManager.Instance.CurrentAnimal is DogData)
+        {
+            //RoundManager.Instance.StartJumpScareRoutine();
+            stressScreen.SetActive(true);
+        }*/
+         if (RoundManager.Instance.CurrentStress >= 100)
+         {
+            stressScreen.SetActive(true);
+         }
         else gameoverScreen.SetActive(true);
     }
 

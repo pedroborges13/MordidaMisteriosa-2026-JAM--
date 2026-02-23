@@ -211,7 +211,7 @@ public class RoundManager : MonoBehaviour
 
                     if (snakeAnim != null) snakeAnim.SetTrigger("HandAttack");
 
-                    StartCoroutine(DelayedGameOver());
+                    StartJumpScareRoutine();
 
                     return;
                 }
@@ -314,8 +314,14 @@ public class RoundManager : MonoBehaviour
         }
     }
 
+    public void StartJumpScareRoutine()
+    {
+        StartCoroutine(DelayedGameOver());
+    }
+
     IEnumerator DelayedGameOver()
     {
+        //snakeJumpscare.SetActive(true);
         yield return new WaitForSeconds(0.2f);
         if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(AudioManager.Instance.pianoJumpScare);
         yield return new WaitForSeconds(0.6f);

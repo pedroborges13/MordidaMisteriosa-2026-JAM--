@@ -71,7 +71,6 @@ public class GuessManager : MonoBehaviour
             if (!guessedDog)
             {
                 LoseGame();
-                return;
             }
 
             //Size: 0 = Small, 1 = Big
