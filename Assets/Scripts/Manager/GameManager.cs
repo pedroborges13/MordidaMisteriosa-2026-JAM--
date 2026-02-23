@@ -61,7 +61,12 @@ public class GameManager : MonoBehaviour
 
     public void SetVictory() => ChangeState(GameState.Victory);
     public void SetGameOver() => ChangeState(GameState.GameOver);
-
+    public void ReturnPauseButton() => ChangeState(GameState.Playing);
+    public void BackToMenu()
+    {
+        Time.timeScale = 1;
+        SceneManager.LoadScene("MainMenu");
+    }
     public void RestartGame() => SceneManager.LoadScene("SampleScene");
 
     public void QuitGame()

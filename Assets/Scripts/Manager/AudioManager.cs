@@ -11,6 +11,8 @@ public class AudioManager : MonoBehaviour
     [Header("SFX")]
     public AudioClip pianoJumpScare;
     public AudioClip snakeHissing;
+    public AudioClip smallDogWhining;
+    public AudioClip bigDogWhining;
 
     void Awake()
     {

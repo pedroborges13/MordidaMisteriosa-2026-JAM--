@@ -182,7 +182,7 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
-  - m_Name: Big Shake
+  - m_Name: BigShake
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -287,7 +287,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: Big Shake
+    m_ConditionEvent: BigShake
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -5761688426956994155}

@@ -1,7 +1,6 @@
 using System.Collections;
 using TMPro;
 using Unity.VisualScripting;
-using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,9 +13,11 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Slider stressBar;
 
     [Header("Screens")]
+    [SerializeField] private GameObject tutorialScreen;
     [SerializeField] private GameObject HUDobject;
     [SerializeField] private GameObject pauseScreen;
     [SerializeField] private GameObject gameoverScreen;
+    [SerializeField] private GameObject stressScreen;
     [SerializeField] private GameObject resultScreen;
     [SerializeField] private TextMeshProUGUI resultTitleText;
     [SerializeField] private TextMeshProUGUI animalNameText;
@@ -46,12 +47,16 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject mainCamera;
     [SerializeField] private GameObject revelationCamera;
     [SerializeField] private GameObject redImage;
+    [SerializeField] private GameObject restartButtonHidden;
     [SerializeField] private float fadeDuration;
 
+    private Canvas mainCanvas;
     void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        if (mainCanvasTransform != null) mainCanvas = mainCanvasTransform.GetComponent<Canvas>();
     }
 
     void Start()
@@ -67,7 +72,7 @@ public class UIManager : MonoBehaviour
 
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.OnStateChanged += HandleStateChange;
+            GameManager.Instance.OnStateChanged += HandlePausedState;
         }
 
         UpdateActionPointUI(RoundManager.Instance.ActionPoints);
@@ -77,9 +82,17 @@ public class UIManager : MonoBehaviour
         stressBar.minValue = 0;
         stressBar.maxValue = RoundManager.Instance.MaxStress;
         stressBar.value = 0;
+
+        gameoverScreen.SetActive(false);
+        ShowTutorialScreen();
+
+        if (mainCanvas != null && mainCamera != null)
+        {
+            mainCanvas.worldCamera = mainCamera.GetComponent<Camera>();
+        }
     }
 
-    void HandleStateChange(GameState newState)
+    void HandlePausedState(GameState newState)
     {
         pauseScreen.SetActive(false);
         resultScreen.SetActive(false);
@@ -90,7 +103,7 @@ public class UIManager : MonoBehaviour
 
     void ShowFeedback(string message)
     {
-        if (string.IsNullOrEmpty(message)) return;
+        if (string.IsNullOrEmpty(message) || RoundManager.Instance.CurrentStress >= 100) return;
 
         if (feedbackCoroutine != null) StopCoroutine(feedbackCoroutine);
 
@@ -191,6 +204,11 @@ public class UIManager : MonoBehaviour
         mainCamera.SetActive(false);
         revelationCamera.SetActive(true);
 
+        if (mainCanvas != null && revelationCamera != null)
+        {
+            mainCanvas.worldCamera = revelationCamera.GetComponent<Camera>();
+        }
+
         // --- SNAKE ATTACK LOGIC ---
         if (GameManager.Instance.CurrentState == GameState.GameOver)
         {
@@ -259,7 +277,8 @@ public class UIManager : MonoBehaviour
     public void ShowGameOverScreen()
     {
         DisableHUD();
-        gameoverScreen.SetActive(true);
+        if (RoundManager.Instance.CurrentStress >= 100) stressScreen.SetActive(true);
+        else gameoverScreen.SetActive(true);
     }
 
     void ShowFinalResultScreen()
@@ -273,7 +292,11 @@ public class UIManager : MonoBehaviour
             resultTitleText.text = "Você acertou!";
             resultTitleText.color = Color.green;
         }
-        else if (currentState == GameState.GameOver && currentAnimal is SnakeData) resultTitleText.text = "";
+        else if (currentState == GameState.GameOver && currentAnimal is SnakeData)
+        {
+            resultTitleText.text = "";
+            restartButtonHidden.SetActive(false);
+        }
         else if (currentState == GameState.GameOver)
         {
             resultTitleText.text = "Você errou!";
@@ -300,6 +323,19 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    void ShowTutorialScreen()
+    {
+        DisableHUD();
+        tutorialScreen.SetActive(true);
+    }
+
+    public void CloseTutorialScreen()
+    {
+        Debug.Log("CloseTutorialScreen");
+        EnableHUD();
+        tutorialScreen.SetActive(false);
+    }
+
     private void OnDestroy()
     {
         if (RoundManager.Instance != null)
@@ -311,6 +347,6 @@ public class UIManager : MonoBehaviour
             RoundManager.Instance.OnActionCost -= HandleActionCost;
         }
 
-        if (GameManager.Instance != null) GameManager.Instance.OnStateChanged -= HandleStateChange;
+        if (GameManager.Instance != null) GameManager.Instance.OnStateChanged -= HandlePausedState;
     }
 }

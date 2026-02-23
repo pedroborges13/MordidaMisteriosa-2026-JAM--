@@ -3,8 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
-using UnityEditor.Experimental.GraphView;
-using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
@@ -27,6 +25,7 @@ public class RoundManager : MonoBehaviour
     [Header("Current Status")]
     [SerializeField] private float currentStress;
     [SerializeField] private AnimalData currentAnimal;
+    public float CurrentStress => currentStress;    
     public AnimalData CurrentAnimal => currentAnimal; //Read only
 
     [Header("Box Animation")]
@@ -98,6 +97,26 @@ public class RoundManager : MonoBehaviour
 
     }
 
+    private void AddStress(int amount)
+    {
+        currentStress += amount;
+
+        currentStress = Mathf.Clamp(currentStress, 0, maxStress);
+
+        OnStressChanged?.Invoke(currentStress);
+        OnStressAdded?.Invoke(amount);
+
+        if (currentStress >= maxStress)
+        {
+            Debug.Log("O animal ficou estressado demais e você perdeu!");
+
+            GameManager.Instance.SetGameOver();
+            UIManager.Instance.ShowGameOverScreen();
+
+            OnGameOver?.Invoke();
+        }
+    }
+
     public void ExecuteAction(ActionData action)
     {
         if (actionPoints < action.Cost)
@@ -114,6 +133,11 @@ public class RoundManager : MonoBehaviour
 
         if (currentStress >= maxStress)
         {
+            if (currentAnimal is DogData dog)
+            {
+                if (dog.Size == Size.Small) AudioManager.Instance.PlaySFX(AudioManager.Instance.smallDogWhining);
+                if (dog.Size == Size.Big) AudioManager.Instance.PlaySFX(AudioManager.Instance.bigDogWhining);
+            }
             Debug.Log("You stressed the animal and it ran away :( ");
             OnGameOver?.Invoke();
         }
@@ -131,34 +155,46 @@ public class RoundManager : MonoBehaviour
         switch (actionType)
         {
             case ActionType.Water:
+                StartCoroutine(BoxOpenCloseAnimationRoutine());
                 if (dog != null)
                 {
-                    feedback = "Algo se sacudiu lá dentro...";
-
                     if (dog.Size == Size.Small)
                     {
-                        reaction = BoxReaction.SmallShake;
+                        if (dog.Temperament == Temperament.Docile)
+                        {
+                            reaction = BoxReaction.SmallShake;
+                            feedback = "Alguma coisa se sacudiu lá dentro... Porém a caixa não se moveu muito";
+                            stressToAdd = 25;
+                        }
+                        else if (dog.Temperament == Temperament.Restless || dog.Temperament == Temperament.Agressive)
+                        {
+                            reaction = BoxReaction.BigShake;
+                            feedback = "Meu Deus! Esse animalzinho com certeza tem força... Será que ele ama água? não entendi se quer brincar ou se odiou";
+                            stressToAdd = 35;
+                        }
                     }
                     else if (dog.Size == Size.Big)
                     {
-                        reaction = BoxReaction.BigShake;
+                        if(dog.Temperament == Temperament.Docile)
+                        {
+                            reaction = BoxReaction.BigShake;
+                            feedback = "Acho que é um animal grande. Mas não sei se gostou ou não da água";
+                            stressToAdd = 25;
+                        }
+                        else if (dog.Temperament == Temperament.Restless || dog.Temperament == Temperament.Agressive)
+                        {
+                            reaction = BoxReaction.BigShake;
+                            feedback = "Meu Deus! A caixa quase caiu.... Mas não sei se gostou ou não da água";
+                            if (dog.Temperament == Temperament.Restless) stressToAdd = 25;
+                            else if (dog.Temperament == Temperament.Agressive) stressToAdd = 35;
+                        }
                     }
-
-                    if (dog.Temperament == Temperament.Docile)
-                    {
-                        stressToAdd = 10;
-                    }
-                    else if (dog.Temperament == Temperament.Restless || dog.Temperament == Temperament.Agressive)
-                    {
-                        stressToAdd = 20;
-                    }
-
                 }
                 else if (snake != null)
                 {
-                    reaction = BoxReaction.None;
-                    feedback = "Nenhuma reacão...";
-                    stressToAdd = 0;
+                    reaction = BoxReaction.SmallShake;
+                    feedback = "Alguma coisa se sacudiu lá dentro... Porém a caixa não se moveu muito";
+                    stressToAdd = 25;
                 }
                 break;
 
@@ -184,20 +220,20 @@ public class RoundManager : MonoBehaviour
                     if (dog.Temperament == Temperament.Docile)
                     {
                         reaction = BoxReaction.SmallShake;
-                        feedback = "Humm, parece um animal bonzinho";
-                        stressToAdd = 0;
+                        feedback = "Que fofo! Ele gostou do carinho, parece um animal bonzinho";
+                        stressToAdd = 15;
                     }
                     else if (dog.Temperament == Temperament.Restless)
                     {
                         reaction = BoxReaction.SmallShake;
-                        feedback = "Humm, ele está meio agitado";
-                        stressToAdd = 20;
+                        feedback = "Humm, esse bicho está meio agitado. Será que quer brincar ou foi um aviso para me manter longe?";
+                        stressToAdd = 35;
                     }
                     else if (dog.Temperament == Temperament.Agressive)
                     {
                         reaction = BoxReaction.BigShake;
-                        feedback = "Fui mordido!!";
-                        stressToAdd = 50;
+                        feedback = "AIII! Alguma coisa peluda me mordeu!!";
+                        stressToAdd = 65;
                     }
                 }
                 break;
@@ -206,8 +242,8 @@ public class RoundManager : MonoBehaviour
                 if (snake != null)
                 {
                     reaction = BoxReaction.BigShake;
-                    feedback = "Não parece ser um bicho pesado, mas ele não gostou disso";
-                    stressToAdd = 30;
+                    feedback = "Não parece ser um bicho pesado, até que está leve a caixa... Com certeza ele se incomodou com meu chacoalhão";
+                    stressToAdd = 35;
                 }
                 else if (dog != null)
                 {
@@ -216,50 +252,51 @@ public class RoundManager : MonoBehaviour
                         if (dog.Temperament == Temperament.Docile)
                         {
                             reaction = BoxReaction.SmallShake;
-                            feedback = "A caixa é razoavelmente leve";
-                            stressToAdd = 10;
+                            feedback = "Não parece ser um bicho pesado, até que está leve a caixa... Aparentemente ele não se incomodou muito com o chacoalhão";
+                            stressToAdd = 15;
                         }
                         else if (dog.Temperament == Temperament.Restless)
                         {
                             reaction = BoxReaction.BigShake;
-                            feedback = "A caixa é leve";
-                            stressToAdd = 10;
+                            feedback = "Não parece ser um bicho pesado, até que está leve a caixa... Aparentemente ele se incomodou com meu chacoalhão";
+                            stressToAdd = 15;
                         }
                         else if (dog.Temperament == Temperament.Agressive)
                         {
                             reaction = BoxReaction.BigShake;
-                            feedback = "A caixa é leve";
-                            stressToAdd = 30;
+                            feedback = "Não parece ser um bicho pesado, até que está leve a caixa... Com certeza ele se incomodou com meu chacoalhão";
+                            stressToAdd = 35;
                         }
                     }
                     else if (dog.Size == Size.Big)
                     {
-                        feedback = "Que caixa pesada!";
 
                         if (dog.Temperament == Temperament.Docile)
                         {
                             reaction = BoxReaction.SmallShake;
-                            stressToAdd = 10;
+                            feedback = "Que caixa pesada! Mas o grandão ai está bem tranquilo";
+                            stressToAdd = 15;
                         }
                         else if (dog.Temperament == Temperament.Restless)
                         {
                             reaction = BoxReaction.BigShake;
-                            stressToAdd = 10;
+                            feedback = "Que caixa pesada! Acho que o grandão quer brincar comigo... ou não gostou muito do meu chacoalhão";
+                            stressToAdd = 25;
                         }
                         else if (dog.Temperament == Temperament.Agressive)
                         {
                             reaction = BoxReaction.BigShake;
-                            stressToAdd = 30;
+                            feedback = "Que caixa pesada! Acho que o grandão quer brincar comigo... ou não gostou muito do meu chacoalhão";
+                            stressToAdd = 35;
                         }
                     }
                 }
                 break;
         }
 
-        currentStress += stressToAdd;
-        OnStressChanged?.Invoke(currentStress);
+        AddStress(stressToAdd);
         OnFeedbackReceived?.Invoke(feedback);
-        OnStressAdded?.Invoke(stressToAdd);
+
         if (boxAnimator != null && reaction != BoxReaction.None) boxAnimator.SetTrigger(reaction.ToString());
 
         Debug.Log($"Stress Atual: {currentStress}/{maxStress} | Feedback: {feedback}");
@@ -282,6 +319,7 @@ public class RoundManager : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
         if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(AudioManager.Instance.pianoJumpScare);
         yield return new WaitForSeconds(0.6f);
+        snakeJumpscare.SetActive(false);
         UIManager.Instance.ShowGameOverScreen();
         OnGameOver?.Invoke();
     }
