@@ -1,5 +1,6 @@
 # 2 Reais ou uma Mordida Misteriosa? (“2 Reais or a Mysterious Bite?”) (2026-Game Jam) 
 Developed for the CRTL ALT Jam. Theme: "Everything must, but not everything can" (Tudo deve, mas nem tudo pode)
+![JumpscareVideo](https://github.com/user-attachments/assets/e6fe93d4-5656-4bcd-abea-a0a60a3d0c1f)
 
 This game was developed in just 4-5 days of active work during a 9-day Game Jam, due to team schedule conflicts. It is a suspense simulation where you receive a gift box. However, what is inside might be a friendly pet… or a dangerous predator.
 The core gameplay revolves around resource management and careful observation. You must use your limited Action Points to interact with the box and gather clues before making a final guess. But be careful: every interaction increases the animal's Stress Level. If it gets too high, the animal might flee or attack!
@@ -38,4 +39,5 @@ Due to limited development time, some areas could be improved:
 ---
 
 ## 🔗 Links
-- Itch.io page: pedrooborges.itch.io/2-reais-ou-uma-mordida-misteriosa
+ Itch.io page: pedrooborges.itch.io/2-reais-ou-uma-mordida-misteriosa
+ -![AnimalVideo](https://github.com/user-attachments/assets/22c95884-8285-4862-a075-85331741d14e)
